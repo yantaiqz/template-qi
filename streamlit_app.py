@@ -1,66 +1,77 @@
-# 安装依赖：pip install streamlit-cookies-manager
 import streamlit as st
-from cookies_manager import CookiesManager
+
+st.title("🎈 My new app")
+st.write(
+    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
+)
+
+
+
 import sqlite3
-import uuid
+import uuid  # <--- 新增导入
 import datetime
-
-# -------------------------- 新增：Cookie管理 --------------------------
-cookies = CookiesManager()
-if not cookies.ready():
-    st.stop()
-
-def get_visitor_id():
-    """修复版：从Cookie获取访客ID，无则生成并写入Cookie（有效期1年）"""
-    # 优先从Cookie读取
-    visitor_id = cookies.get("visitor_id")
-    if not visitor_id:
-        visitor_id = str(uuid.uuid4())
-        # 写入Cookie，有效期365天
-        cookies["visitor_id"] = visitor_id
-        cookies.set_expire("visitor_id", days=365)
-        cookies.save()
-    # 同步到session_state（可选）
-    st.session_state["visitor_id"] = visitor_id
-    return visitor_id
-
-# -------------------------- 原有逻辑保留（仅修改get_visitor_id调用） --------------------------
-DB_FILE = "visit_stats.db"
+import os
+# 持久化目录（Streamlit Share 仅~/目录可持久化）
+DB_DIR = os.path.expanduser("~/")
+DB_FILE = os.path.join(DB_DIR, "visit_stats.db")
+# -------------------------- 配置 --------------------------
+#DB_FILE = "visit_stats.db"
 
 def init_db():
-    """初始化数据库（保留原有逻辑）"""
+    """初始化数据库（包含自动修复旧表结构的功能）"""
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     c = conn.cursor()
     
+    # 1. 确保表存在（这是旧逻辑）
     c.execute('''CREATE TABLE IF NOT EXISTS daily_traffic 
                  (date TEXT PRIMARY KEY, 
                   pv_count INTEGER DEFAULT 0)''')
                   
     c.execute('''CREATE TABLE IF NOT EXISTS visitors 
                  (visitor_id TEXT PRIMARY KEY, 
-                  first_visit_date TEXT,
-                  last_visit_date TEXT)''') # 直接创建完整表，避免动态修改
+                  first_visit_date TEXT)''')
     
+    # 2. 【关键修复】手动检查并添加缺失的列 (Schema Migration)
+    # 获取 visitors 表的所有列名
+    c.execute("PRAGMA table_info(visitors)")
+    columns = [info[1] for info in c.fetchall()]
+    
+    # 如果发现旧数据库里没有 last_visit_date，就动态添加进去
+    if "last_visit_date" not in columns:
+        try:
+            c.execute("ALTER TABLE visitors ADD COLUMN last_visit_date TEXT")
+            # 可选：把所有老数据的最后访问时间初始化为他们的首次访问时间，避免空值
+            c.execute("UPDATE visitors SET last_visit_date = first_visit_date WHERE last_visit_date IS NULL")
+        except Exception as e:
+            print(f"数据库升级失败: {e}")
+
     conn.commit()
     conn.close()
 
+def get_visitor_id():
+    """获取或生成访客ID（修复版：使用UUID替代不稳定的内部API）"""
+    if "visitor_id" not in st.session_state:
+        # 生成一个唯一的随机ID，并保存在当前会话状态中
+        st.session_state["visitor_id"] = str(uuid.uuid4())
+    return st.session_state["visitor_id"]
+
 def track_and_get_stats():
-    """核心统计逻辑（保留原有逻辑）"""
+    """核心统计逻辑"""
     init_db()
     conn = sqlite3.connect(DB_FILE, check_same_thread=False)
     c = conn.cursor()
     
-    # 修复时区问题：使用本地时间而非UTC（根据需求调整）
-    today_str = datetime.datetime.now().date().isoformat()
-    visitor_id = get_visitor_id() # 调用新的Cookie版函数
+    today_str = datetime.datetime.utcnow().date().isoformat()
+    visitor_id = get_visitor_id() # 这里调用修改后的函数
 
+    # --- 写操作 (仅当本Session未计数时执行) ---
     if "has_counted" not in st.session_state:
         try:
-            # 更新PV
+            # 1. 更新每日PV
             c.execute("INSERT OR IGNORE INTO daily_traffic (date, pv_count) VALUES (?, 0)", (today_str,))
             c.execute("UPDATE daily_traffic SET pv_count = pv_count + 1 WHERE date=?", (today_str,))
             
-            # 更新UV
+            # 2. 更新访客UV信息
             c.execute("SELECT visitor_id FROM visitors WHERE visitor_id=?", (visitor_id,))
             exists = c.fetchone()
             
@@ -76,28 +87,34 @@ def track_and_get_stats():
         except Exception as e:
             st.error(f"数据库写入错误: {e}")
 
-    # 读取统计数据
+    # --- 读操作 ---
+    # 1. 获取今日UV
     c.execute("SELECT COUNT(*) FROM visitors WHERE last_visit_date=?", (today_str,))
     today_uv = c.fetchone()[0]
     
+    # 2. 获取历史总UV
     c.execute("SELECT COUNT(*) FROM visitors")
     total_uv = c.fetchone()[0]
 
+    # 3. 获取今日PV
     c.execute("SELECT pv_count FROM daily_traffic WHERE date=?", (today_str,))
     res_pv = c.fetchone()
     today_pv = res_pv[0] if res_pv else 0
     
     conn.close()
+    
     return today_uv, total_uv, today_pv
 
-# -------------------------- 页面展示（保留原有逻辑） --------------------------
+# -------------------------- 页面展示 --------------------------
+
+# 执行统计
 try:
     today_uv, total_uv, today_pv = track_and_get_stats()
 except Exception as e:
     st.error(f"统计模块出错: {e}")
     today_uv, total_uv, today_pv = 0, 0, 0
 
-# CSS样式（保留）
+# CSS 样式
 st.markdown("""
 <style>
     .metric-container {
@@ -130,7 +147,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# 展示数据（保留）
+# 展示数据
 st.markdown(f"""
 <div class="metric-container">
     <div class="metric-box">

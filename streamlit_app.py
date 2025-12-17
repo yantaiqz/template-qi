@@ -1,8 +1,7 @@
 import streamlit as st
-import webbrowser  # 用于打开新页面
 
 # -------------------------- 右上角功能区 --------------------------
-# 创建右上角布局（占满整行，右侧显示按钮）
+# 创建右上角布局（占满整行，右侧显示按钮/链接）
 col_empty, col_lang, col_more = st.columns([0.8, 0.1, 0.1])
 
 with col_lang:
@@ -10,9 +9,17 @@ with col_lang:
     st.button("中/英文", key="lang_switch", help="语言切换（暂无实际功能）")
 
 with col_more:
-    # 点击打开新页面的按钮
-    if st.button("更多好玩应用", key="more_apps"):
-        webbrowser.open_new_tab("https://haowan.streamlit.app/")
+    # 修复：改用 HTML 链接按钮（替代 webbrowser 方式，兼容 Streamlit 云环境）
+    st.markdown(
+        f"""
+        <a href="https://haowan.streamlit.app/" target="_blank">
+            <button style="width:100%; font-size:0.85rem; padding:4px 8px; background-color:#0EA5E9; color:white; border:none; border-radius:4px; cursor:pointer;">
+                更多好玩应用
+            </button>
+        </a>
+        """,
+        unsafe_allow_html=True
+    )
 
 # -------------------------- 原有代码 --------------------------
 st.title("🎈 My new app")
@@ -250,12 +257,15 @@ st.markdown("""
         color: #adb5bd;
     }
     /* 优化右上角按钮样式 */
-    div[data-testid="column"]:nth-child(2) button,
-    div[data-testid="column"]:nth-child(3) button {
+    div[data-testid="column"]:nth-child(2) button {
         width: 100%;
         white-space: nowrap;
         font-size: 0.85rem;
         padding: 4px 8px;
+    }
+    /* 确保HTML按钮和原生按钮样式一致 */
+    div[data-testid="column"]:nth-child(3) button:hover {
+        background-color: #0284c7;
     }
 </style>
 """, unsafe_allow_html=True)

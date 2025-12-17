@@ -6,6 +6,99 @@ st.write(
 )
 
 
+import json
+import datetime
+import os  
+import time 
+
+# --- 权限配置 ---
+FREE_PERIOD_SECONDS = 60      # 免费试用期 60 秒
+ACCESS_DURATION_HOURS = 24    # 密码解锁后的访问时长 24 小时
+UNLOCK_CODE = "vip24"        # 预设的解锁密码
+# --- 配置结束 ---
+
+# -------------------------------------------------------------
+# --- 1. 初始化会话状态 ---
+# -------------------------------------------------------------
+
+# 'start_time': 首次访问时间，用于计算免费试用期
+if 'start_time' not in st.session_state:
+    st.session_state.start_time = datetime.datetime.now()
+    # 'access_status': 'free' (免费期), 'locked' (需解锁), 'unlocked' (已解锁)
+    st.session_state.access_status = 'free'
+    st.session_state.unlock_time = None # 记录密码解锁的时间点
+
+# -------------------------------------------------------------
+# --- 2. 检查访问状态和时间逻辑 ---
+# -------------------------------------------------------------
+
+current_time = datetime.datetime.now()
+access_granted = False # 默认无权限
+
+# 检查当前状态并更新
+if st.session_state.access_status == 'free':
+    time_elapsed = (current_time - st.session_state.start_time).total_seconds()
+    
+    if time_elapsed < FREE_PERIOD_SECONDS:
+        # 仍在免费期内
+        access_granted = True
+        time_left = FREE_PERIOD_SECONDS - time_elapsed
+        st.info(f"⏳ **免费试用中... 剩余 {time_left:.1f} 秒。**")
+    else:
+        # 免费期结束，进入锁定状态
+        st.session_state.access_status = 'locked'
+        st.session_state.start_time = None # 清除免费期计时
+        st.rerun() # 强制刷新以立即显示锁定界面
+        
+elif st.session_state.access_status == 'unlocked':
+    unlock_expiry = st.session_state.unlock_time + datetime.timedelta(hours=ACCESS_DURATION_HOURS)
+    
+    if current_time < unlock_expiry:
+        # 在 24 小时有效期内
+        access_granted = True
+        time_left_delta = unlock_expiry - current_time
+        hours = int(time_left_delta.total_seconds() // 3600)
+        minutes = int((time_left_delta.total_seconds() % 3600) // 60)
+        
+        st.info(f"🔓 **付费权限剩余:** {hours} 小时 {minutes} 分钟")
+    else:
+        # 24 小时已过期，进入锁定状态
+        st.session_state.access_status = 'locked'
+        st.session_state.unlock_time = None
+        st.rerun() # 强制刷新
+
+# -------------------------------------------------------------
+# --- 3. 锁定界面及密码输入 ---
+# -------------------------------------------------------------
+
+if not access_granted:
+    st.error("🔒 **访问受限。免费试用期已结束！**")
+    st.markdown(f"""
+    <div style="background-color: #fff; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin-top: 15px;">
+        <p style="font-weight: 600; color: #1f2937; margin-bottom: 5px;">🔑 10元解锁无限制访问权限，获取代码链接 (请在微信中打开)</p>
+        <p style="font-size: 0.9em; background-color: #eef2ff; padding: 8px; border-radius: 4px; overflow-wrap: break-word;">
+            <code>#小程序://闲鱼/i4ahD0rqwGB5lba</code>
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    with st.form("access_lock_form"):
+        password_input = st.text_input("解锁代码:", type="password", key="password_input_key")
+        submit_button = st.form_submit_button("验证并解锁")
+        
+        if submit_button:
+            if password_input == UNLOCK_CODE:
+                st.session_state.access_status = 'unlocked'
+                st.session_state.unlock_time = datetime.datetime.now()
+                st.success("🎉 解锁成功！您已获得 1 天访问权限。页面即将刷新...")
+                st.rerun()
+            else:
+                st.error("❌ 代码错误，请重试。")
+                
+    # 强制停止脚本，隐藏所有受保护的内容
+    st.stop()
+
+
 
 import sqlite3
 import uuid  # <--- 新增导入

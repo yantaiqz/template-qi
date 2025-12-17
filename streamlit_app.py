@@ -35,7 +35,7 @@ st.markdown("""
 
 
 # 创建右上角布局（占满整行，右侧显示按钮/链接）
-col_empty, col_lang, col_more = st.columns([0.8, 0.1, 0.1])
+col_empty, col_lang, col_more = st.columns([0.7, 0.1, 0.2])
 
 with col_lang:
     # 仅展示无实际功能的语言切换按钮
@@ -46,7 +46,7 @@ with col_more:
     st.markdown(
         f"""
         <a href="https://haowan.streamlit.app/" target="_blank" class="neal-btn-link">
-            <button class="neal-btn">更多好玩应用</button>
+            <button class="neal-btn">✨ 更多好玩应用</button>
         </a>
         """, 
         unsafe_allow_html=True

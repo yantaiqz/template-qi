@@ -1,6 +1,39 @@
 import streamlit as st
 
 # -------------------------- 右上角功能区 --------------------------
+
+st.markdown("""
+<style>
+    /* 2. HTML 链接按钮 (Get New Apps) */
+    .neal-btn {
+        font-family: 'Inter', sans-serif;
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        color: #111;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        text-decoration: none !important;
+        width: 100%;
+        height: 38px; /* 强制与 st.button 高度对齐 */
+    }
+    .neal-btn:hover {
+        background: #f9fafb;
+        border-color: #111;
+        transform: translateY(-1px);
+    }
+    .neal-btn-link { text-decoration: none; width: 100%; display: block; }
+</style>
+""", unsafe_allow_html=True)
+
+
 # 创建右上角布局（占满整行，右侧显示按钮/链接）
 col_empty, col_lang, col_more = st.columns([0.8, 0.1, 0.1])
 
@@ -12,14 +45,16 @@ with col_more:
     # 修复：改用 HTML 链接按钮（替代 webbrowser 方式，兼容 Streamlit 云环境）
     st.markdown(
         f"""
-        <a href="https://haowan.streamlit.app/" target="_blank">
-            <button style="width:100%; font-size:0.85rem; padding:4px 8px; background-color:#0EA5E9; color:white; border:none; border-radius:4px; cursor:pointer;">
-                更多好玩应用
-            </button>
+        <a href="https://haowan.streamlit.app/" target="_blank" class="neal-btn-link">
+            <button class="neal-btn">更多好玩应用</button>
         </a>
-        """,
+        """, 
         unsafe_allow_html=True
     )
+
+    
+
+
 
 # -------------------------- 原有代码 --------------------------
 st.title("🎈 My new app")

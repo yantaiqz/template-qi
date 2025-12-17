@@ -7,12 +7,18 @@ st.write(
 
 
 
+
+
 import sqlite3
 import uuid  # <--- 新增导入
 import datetime
+import os
 
+# 持久化目录（Streamlit Share 仅~/目录可持久化）
+DB_DIR = os.path.expanduser("~/")
+DB_FILE = os.path.join(DB_DIR, "visit_stats.db")
 # -------------------------- 配置 --------------------------
-DB_FILE = "visit_stats.db"
+#DB_FILE = "visit_stats.db"
 
 def init_db():
     """初始化数据库（包含自动修复旧表结构的功能）"""

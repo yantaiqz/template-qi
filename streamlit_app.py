@@ -326,3 +326,155 @@ st.markdown(f"""
     </div>
 </div>
 """, unsafe_allow_html=True)
+
+
+
+
+# 初始化多语言和咖啡数量状态
+if 'language' not in st.session_state:
+    st.session_state.language = 'zh'
+if 'coffee_num' not in st.session_state:
+    st.session_state.coffee_num = 1
+
+# 多语言文本（仅保留咖啡相关）
+lang_texts = {
+    'zh': {
+        'coffee_title': '请老登喝杯咖啡 ☕',
+        'coffee_desc': '如果这些小工具让你感到了底线，欢迎支持老登的创作。',
+        'footer_btn3': '请老登一杯咖啡 ☕',
+        'custom_count': '自定义数量 (杯)',
+        'support_amount': '支持 {count} 杯需',
+        'img_error': '收款码图片加载失败'
+    },
+    'en': {
+        'coffee_title': 'Buy me a coffee ☕',
+        'coffee_desc': 'If you find these tools helpful, consider supporting my work!',
+        'footer_btn3': 'Support Me ☕',
+        'custom_count': 'Custom count (cups)',
+        'support_amount': 'Support {count} cups',
+        'img_error': 'Payment QR code load failed'
+    }
+}
+current_text = lang_texts[st.session_state.language]
+
+# ==========================================
+# 2. 核心CSS（仅保留咖啡弹窗样式）
+# ==========================================
+st.markdown(f"""
+<style>
+    /* 基础样式重置 */
+    .stApp {{ background-color: #FFFFFF !important; }}
+    .block-container {{ padding-top: 2rem; max-width: 600px !important; }}
+    
+    /* 按钮样式优化 */
+    .stButton > button {{
+        background: white !important;
+        border: 1px solid #e5e7eb !important;
+        border-radius: 10px !important;
+        padding: 0.5rem 1rem !important;
+        font-weight: 600 !important;
+        transition: all 0.2s !important;
+        width: 100%;
+    }}
+    .stButton > button:hover {{
+        background: #f9fafb !important;
+        border-color: #d1d5db !important;
+        transform: translateY(-1px);
+    }}
+    
+    /* 金额展示样式 */
+    .price-container {{
+        text-align:center; margin: 15px 0; 
+        padding: 15px; background-color:#f8f9fa; 
+        border-radius:12px; border:1px solid #eee;
+    }}
+    .price-desc {{ font-size:0.9rem; color:#666; }}
+    .price-value {{ font-size:2.4rem; font-weight:800; color:#d9534f; line-height:1.2; }}
+    
+    /* 语言切换按钮 */
+    .lang-btn {{ position: fixed; top: 20px; right: 20px; z-index: 999; }}
+</style>
+""", unsafe_allow_html=True)
+
+# ==========================================
+# 3. 咖啡打赏弹窗核心逻辑
+# ==========================================
+@st.dialog(current_text['coffee_title'])
+def show_coffee_window():
+    # 1. 打赏描述文本
+    st.markdown(f"""
+        <div style='text-align:center; margin-bottom:15px; color:#444; font-size:0.95rem;'>
+            {current_text['coffee_desc']}
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 2. 咖啡数量回调函数
+    def set_coffee(num):
+        st.session_state.coffee_num = num
+
+    # 3. 快速选择按钮（1/3/5杯）
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        st.button("🍺 1杯", use_container_width=True, on_click=set_coffee, args=(1,))
+    with c2:
+        st.button("🍺 3杯", use_container_width=True, on_click=set_coffee, args=(3,))
+    with c3:
+        st.button("🍺 5杯", use_container_width=True, on_click=set_coffee, args=(5,))
+
+    # 4. 自定义数量输入框
+    count = st.number_input(
+        current_text['custom_count'], 
+        min_value=1, 
+        max_value=100, 
+        step=1, 
+        key='coffee_num'
+    )
+    
+    # 5. 金额计算与展示
+    total_price = count * 10  # 单价10元/杯
+    st.markdown(f"""
+        <div class="price-container">
+            <div class="price-desc">{current_text['support_amount'].format(count=count)}</div>
+            <div class="price-value">¥ {total_price}</div>
+        </div>
+    """, unsafe_allow_html=True)
+
+    # 6. 收款码展示（居中）
+    col_img1, col_img2, col_img3 = st.columns([1, 2, 1])
+    with col_img2:
+        try:
+            # 替换为你的收款码图片路径（本地/网络）
+            st.image("wechat_pay.jpg", use_container_width=True)
+        except Exception as e:
+            st.error(current_text['img_error'])
+            st.caption(f"错误信息: {str(e)}")
+
+# ==========================================
+# 4. 页面渲染（简化版，仅保留核心入口）
+# ==========================================
+def render_coffee_donate():
+    # 语言切换按钮
+    with st.container():
+        l_btn = "En" if st.session_state.language == 'zh' else "中"
+        if st.button(l_btn, key="lang_switch", class_="lang-btn"):
+            st.session_state.language = 'en' if st.session_state.language == 'zh' else 'zh'
+            st.rerun()
+
+    # 页面标题
+    st.markdown(f"""
+        <h1 style='text-align:center; font-size:2.5rem; font-weight:800; margin: 2rem 0;'>
+            {current_text['coffee_title']}
+        </h1>
+    """, unsafe_allow_html=True)
+
+    # 打赏入口按钮
+    st.markdown("<div style='text-align:center; margin: 2rem 0;'>", unsafe_allow_html=True)
+    if st.button(current_text['footer_btn3'], use_container_width=True, type="primary"):
+        show_coffee_window()
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========================================
+# 5. 入口函数
+# ==========================================
+if __name__ == "__main__":
+    render_coffee_donate()

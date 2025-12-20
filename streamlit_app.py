@@ -272,7 +272,7 @@ def show_coffee_window():
             st.image(f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Pay_{total}", width=150)
             
     with t1: show_qr("wechat_pay.jpg")
-    with t2: show_qr("alipay.jpg")
+    with t2: show_qr("ali_pay.jpg")
 
     # 4. 支付反馈
     st.write("")

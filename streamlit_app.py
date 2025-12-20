@@ -51,8 +51,8 @@ st.markdown("""
     .coffee-card {
         background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
         border: 1px solid #e5e7eb; border-radius: 16px;
-        padding: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
-        margin-bottom: 15px; text-align: center;
+        padding: 5px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        margin-bottom: 5px; text-align: center;
     }
     .price-tag-container {
         background: #fff0f0; border: 1px dashed #ffcccc;
@@ -223,7 +223,7 @@ st.markdown(f"""
 # ==========================================
 # 8. 新版咖啡打赏逻辑 (替换旧版)
 # ==========================================
-@st.dialog("☕ 支持作者", width="small")
+@st.dialog("☕", width="small")
 def show_coffee_window():
     # 头部信息
     st.markdown(f"""

@@ -223,7 +223,7 @@ st.markdown(f"""
 # ==========================================
 # 8. 新版咖啡打赏逻辑 (替换旧版)
 # ==========================================
-@st.dialog("☕", width="small")
+@st.dialog("", width="small")
 def show_coffee_window():
     # 头部信息
     st.markdown(f"""

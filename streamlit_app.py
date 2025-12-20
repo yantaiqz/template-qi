@@ -285,7 +285,7 @@ def show_coffee_window():
 # ==========================================
 # 9. 页面主内容与入口
 # ==========================================
-st.markdown(f"<h1 style='text-align:center;'>{current_text['coffee_title']}</h1>", unsafe_allow_html=True)
+#st.markdown(f"<h1 style='text-align:center;'>{current_text['coffee_title']}</h1>", unsafe_allow_html=True)
 
 # 触发按钮
 col_center = st.columns([1, 2, 1])

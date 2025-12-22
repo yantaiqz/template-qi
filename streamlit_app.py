@@ -330,7 +330,6 @@ with c2:
                 <div class="pay-card">
                     <div class="pay-label {color_class}">{title}</div>
                     <div class="pay-amount-display {color_class}">{amount_str}</div>
-                </div>
             """, unsafe_allow_html=True)
             
             # 卡片中部：二维码或图片
@@ -354,6 +353,12 @@ with c2:
                 # 扫码提示
                 st.markdown('<div class="pay-instruction">请使用手机扫描上方二维码</div>', unsafe_allow_html=True)
 
+
+            # 卡片头部
+            st.markdown(f"""
+                </div>
+            """, unsafe_allow_html=True)
+            
         # 5. 支付方式 Tabs
         st.write("")
         t1, t2, t3 = st.tabs([get_txt('pay_wechat'), get_txt('pay_alipay'), get_txt('pay_paypal')])

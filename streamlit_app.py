@@ -9,7 +9,7 @@ import time
 # 1. 全局配置
 # ==========================================
 st.set_page_config(
-    page_title="工具集合 | AI.Fun",
+    page_title="Template | AI",
     page_icon="🦕",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -62,7 +62,7 @@ st.markdown("""
     .price-tag-container:hover { transform: scale(1.02); }
     .price-label { color: #888; font-size: 0.8rem; margin-bottom: 2px; }
     .price-number { color: #d9534f; font-weight: 900; font-size: 1.8rem; }
-    
+
     /* 语言切换按钮定位 */
     [data-testid="button-lang_switch"] {
         position: fixed; top: 20px; right: 120px; z-index: 999; width: 80px !important;
@@ -134,8 +134,7 @@ if 'language' not in st.session_state:
 if 'coffee_num' not in st.session_state:
     st.session_state.coffee_num = 1
 
-if 'has_counted' not in st.session_state:
-    st.session_state.has_counted = False
+  
 if 'visitor_id' not in st.session_state:
     st.session_state["visitor_id"] = str(uuid.uuid4())
 

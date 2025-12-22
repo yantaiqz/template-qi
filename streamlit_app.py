@@ -353,7 +353,7 @@ with c2:
 
         # 5. 支付方式 Tabs
         st.write("")
-        t1, t2, t3 = st.tabs([get_txt('pay_wechat'), get_txt('pay_alipay'), get_txt('pay_paypal')])
+        t1, t2, t3 = st.tabs([get_txt('pay_wechat'), get_txt('pay_alipay'), get_txt('paypal')])
         
         with t1:
             render_pay_tab("WeChat Pay", f"¥{cny_total}", "color-wechat", "wechat_pay.jpg", "WeChat")
@@ -363,7 +363,7 @@ with c2:
             
         with t3:
             # PayPal 特殊处理：提供 URL 跳转
-            render_pay_tab("PayPal", f"${usd_total}", "color-paypal", "paypal.png", "PayPal", "https://paypal.me/yourid")
+            render_pay_tab("PayPal", f"${usd_total}", "color-paypal", "paypal.png", "PayPal", "https://paypal.me/ytqz")
         
         # 6. 确认按钮
         st.write("")

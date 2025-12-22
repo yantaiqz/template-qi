@@ -322,42 +322,45 @@ with c2:
         # 汇率计算逻辑
         cny_total = cnt * 10
         usd_total = cnt * 2
-
+        
         # 4. 统一支付卡片渲染函数 (核心复用逻辑)
         def render_pay_tab(title, amount_str, color_class, img_path, qr_data_suffix, link_url=None):
-            # 卡片头部
-            st.markdown(f"""
-                <div class="pay-card">
-                    <div class="pay-label {color_class}">{title}</div>
-                    <div class="pay-amount-display {color_class}">{amount_str}</div>
-            """, unsafe_allow_html=True)
-            
-            # 卡片中部：二维码或图片
-            # 使用 container + columns 居中图片
-            c_img_1, c_img_2, c_img_3 = st.columns([1, 3, 1])
-            with c_img_2:
-                if os.path.exists(img_path): 
-                    st.image(img_path, use_container_width=True)
-                else: 
-                    # 本地图片不存在时，生成 API 二维码作为演示
-                    qr_data = f"Donate_{cny_total}_{qr_data_suffix}"
-                    # PayPal 如果是链接模式，二维码也可以指向链接
-                    if link_url: qr_data = link_url
-                    st.image(f"https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={qr_data}", use_container_width=True)
-            
-            # 卡片底部：按钮或提示文字
-            if link_url:
-                # PayPal 等外链跳转
-                st.link_button(f"👉 Pay {amount_str}", link_url, type="primary", use_container_width=True)
-            else:
-                # 扫码提示
-                st.markdown('<div class="pay-instruction">请使用手机扫描上方二维码</div>', unsafe_allow_html=True)
-
-
-            # 卡片头部
-            st.markdown(f"""
-                </div>
-            """, unsafe_allow_html=True)
+            # 使用 st.container 并开启 border 边框
+            with st.container(border=True):
+                # 卡片头部 (包含支付名称和金额)
+                st.markdown(f"""
+                    <div style="text-align: center; padding-bottom: 10px;">
+                        <div class="pay-label {color_class}" style="margin-bottom: 5px;">{title}</div>
+                        <div class="pay-amount-display {color_class}" style="margin: 0; font-size: 1.8rem;">{amount_str}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # 卡片中部：二维码或图片
+                # 调整列比例让图片在边框内更协调
+                c_img_1, c_img_2, c_img_3 = st.columns([1, 4, 1])
+                with c_img_2:
+                    if os.path.exists(img_path): 
+                        st.image(img_path, use_container_width=True)
+                    else: 
+                        # 本地图片不存在时，生成 API 二维码作为演示
+                        qr_data = f"Donate_{cny_total}_{qr_data_suffix}"
+                        # PayPal 如果是链接模式，二维码也可以指向链接
+                        if link_url: qr_data = link_url
+                        st.image(f"https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={qr_data}", use_container_width=True)
+                
+                # 卡片底部：按钮或提示文字
+                if link_url:
+                    # PayPal 等外链跳转
+                    st.write("") # 增加一点间距
+                    st.link_button(f"👉 Pay {amount_str}", link_url, type="primary", use_container_width=True)
+                else:
+                    # 扫码提示
+                    st.markdown(f"""
+                        <div class="pay-instruction" style="text-align: center; padding-top: 10px;">
+                            请使用手机扫描上方二维码
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
             
         # 5. 支付方式 Tabs
         st.write("")

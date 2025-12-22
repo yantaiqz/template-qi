@@ -162,13 +162,11 @@ lang_texts = {
         'pay_alipay': '💙 支付宝',
         'paid_btn': '🎉 我已支付，给老登打气！',
         'paid_toast': '收到！感谢你的 {count} 杯咖啡！代码写得更有劲了！❤️',
-        'presets': [("☕ 提神", "由衷感谢"), ("🍗 鸡腿", "动力加倍"), ("🚀 续命", "老登不朽")]
-
+        'presets': [("☕ 提神", "由衷感谢"), ("🍗 鸡腿", "动力加倍"), ("🚀 续命", "老登不朽")],
         "coffee_btn": "☕ 请开发者喝咖啡",
         "coffee_title": " ",
         "pay_success": "收到！感谢打赏。代码写得更有劲了！❤️",
         "coffee_amount": "请输入打赏杯数"
-        
     },
     'en': {
         'footer_btn3': 'Support Me ☕',
@@ -178,14 +176,12 @@ lang_texts = {
         'pay_alipay': '💙 Alipay',
         'paid_btn': '🎉 I have paid!',
         'paid_toast': 'Received! Thanks for the {count} coffees! ❤️',
-        'presets': [("☕ Coffee", "Thanks"), ("🍗 Meal", "Power Up"), ("🚀 Rocket", "Amazing")]
-
+        'presets': [("☕ Coffee", "Thanks"), ("🍗 Meal", "Power Up"), ("🚀 Rocket", "Amazing")],
         "coffee_btn": "☕ Buy me a coffee",
         "coffee_title": " ",
         "coffee_desc": "If you enjoyed this, consider buying me a coffee!",
         "pay_success": "Received! Thanks for the coffee! ❤️",
         "coffee_amount": "Enter Coffee Count"
-        
     }
 }
 current_text = lang_texts[st.session_state.language]

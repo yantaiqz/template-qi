@@ -67,6 +67,57 @@ st.markdown("""
     [data-testid="button-lang_switch"] {
         position: fixed; top: 20px; right: 120px; z-index: 999; width: 80px !important;
     }
+
+
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+    
+    /* 统一的支付卡片容器 */
+    .pay-card {
+        background: #fdfdfd;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        text-align: center;
+        margin-top: 10px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    
+    /* 金额显示 */
+    .pay-amount-display {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.8rem;
+        font-weight: 800;
+        margin: 10px 0;
+    }
+    
+    /* 支付方式标签 */
+    .pay-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+    }
+    
+    /* 底部操作提示 */
+    .pay-instruction {
+        font-size: 0.8rem;
+        color: #94a3b8;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+    
+    /* 不同渠道的品牌色 */
+    .color-wechat { color: #2AAD67; }
+    .color-alipay { color: #1677ff; }
+    .color-paypal { color: #003087; }
+    
+    /* 按钮微调 */
+    div[data-testid="stButton"] button {
+        border-radius: 8px;
+    }
+    
 </style>
 """, unsafe_allow_html=True)
 
@@ -96,9 +147,13 @@ ACCESS_DURATION_HOURS = 24
 UNLOCK_CODE = "vip24"
 DB_FILE = os.path.join(os.path.expanduser("~/"), "visit_stats.db")
 
+
+
+def get_txt(key): 
+    return LANG_TEXT[st.session_state.lang][key]
+    
 lang_texts = {
     'zh': {
-        'coffee_title': '请老登喝杯咖啡 ☕',
         'coffee_desc': '如果这些工具帮到了你，欢迎支持老登的创作。',
         'footer_btn3': '请老登一杯咖啡 ☕',
         'custom_count': '自定义数量 (杯)',
@@ -108,10 +163,14 @@ lang_texts = {
         'paid_btn': '🎉 我已支付，给老登打气！',
         'paid_toast': '收到！感谢你的 {count} 杯咖啡！代码写得更有劲了！❤️',
         'presets': [("☕ 提神", "由衷感谢"), ("🍗 鸡腿", "动力加倍"), ("🚀 续命", "老登不朽")]
+
+        "coffee_btn": "☕ 请开发者喝咖啡",
+        "coffee_title": " ",
+        "pay_success": "收到！感谢打赏。代码写得更有劲了！❤️",
+        "coffee_amount": "请输入打赏杯数"
+        
     },
     'en': {
-        'coffee_title': 'Buy me a coffee ☕',
-        'coffee_desc': 'If you find these tools helpful, consider supporting my work!',
         'footer_btn3': 'Support Me ☕',
         'custom_count': 'Custom count (cups)',
         'total_label': 'Total',
@@ -120,6 +179,13 @@ lang_texts = {
         'paid_btn': '🎉 I have paid!',
         'paid_toast': 'Received! Thanks for the {count} coffees! ❤️',
         'presets': [("☕ Coffee", "Thanks"), ("🍗 Meal", "Power Up"), ("🚀 Rocket", "Amazing")]
+
+        "coffee_btn": "☕ Buy me a coffee",
+        "coffee_title": " ",
+        "coffee_desc": "If you enjoyed this, consider buying me a coffee!",
+        "pay_success": "Received! Thanks for the coffee! ❤️",
+        "coffee_amount": "Enter Coffee Count"
+        
     }
 }
 current_text = lang_texts[st.session_state.language]
@@ -223,64 +289,98 @@ st.markdown(f"""
 # ==========================================
 # 8. 新版咖啡打赏逻辑 (替换旧版)
 # ==========================================
-@st.dialog(" ", width="small")
-def show_coffee_window():
-    # 头部信息
-    st.markdown(f"""
-    <div class="coffee-card">
-        <h3 style="margin:0; font-size:1.2rem;">{current_text['coffee_title']}</h3>
-        <p style="color:#666; font-size:0.8rem; margin-top:5px;">{current_text['coffee_desc']}</p>
-    </div>""", unsafe_allow_html=True)
+st.title("Component Demo")
+st.write("点击下方按钮体验打赏弹窗：")
 
-    # 1. 预设按钮
-    def set_val(n): st.session_state.coffee_num = n
-    cols = st.columns(3)
-    # 获取当前语言的预设文案
-    presets_data = current_text['presets']
-    # 对应的数量
-    preset_nums = [1, 3, 5]
-    
-    for i, (txt, sub) in enumerate(presets_data):
-        with cols[i]:
-            if st.button(txt, use_container_width=True, key=f"c_btn_{i}"): set_val(preset_nums[i])
-            st.markdown(f"<div style='text-align:center; font-size:0.7rem; color:#aaa; margin-top:-5px;'>{sub}</div>", unsafe_allow_html=True)
-    
-    st.write("")
-    
-    # 2. 数量与金额
-    c1, c2 = st.columns([1, 1])
-    with c1:
-        cnt = st.number_input(current_text['custom_count'], 1, 100, step=1, key='coffee_num')
-    total = cnt * 10
-    with c2:
-        st.markdown(f"""
-        <div class="price-tag-container">
-            <div class="price-label">{current_text['total_label']}</div>
-            <div class="price-number">¥ {total}</div>
-        </div>""", unsafe_allow_html=True)
+c1, c2, c3 = st.columns([1, 2, 1])
 
-    # 3. 支付方式 Tab
-    t1, t2 = st.tabs([current_text['pay_wechat'], current_text['pay_alipay']])
-    
-    def show_qr(img_path):
-        # 如果图片不存在，显示占位符
-        if os.path.exists(img_path):
-            st.image(img_path, use_container_width=True)
-        else:
-            st.warning(f"需放置图片: {img_path}")
-            # 仅作演示的在线占位符
-            st.image(f"https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=Pay_{total}", width=150)
+with c2:
+    @st.dialog(" " + get_txt('coffee_title'), width="small")
+    def show_coffee_window():
+        # 1. 顶部描述
+        st.markdown(f"""<div style="text-align:center; color:#666; margin-bottom:15px;">{get_txt('coffee_desc')}</div>""", unsafe_allow_html=True)
+        
+        # 2. 快捷选择按钮
+        presets = [("☕", 1), ("🍗", 3), ("🚀", 5)]
+        def set_val(n): st.session_state.coffee_num = n
+        
+        cols = st.columns(3, gap="small")
+        for i, (icon, num) in enumerate(presets):
+            with cols[i]:
+                # 点击快捷键直接修改 session_state
+                if st.button(f"{icon} {num}", use_container_width=True, key=f"p_btn_{i}"): 
+                    set_val(num)
+        st.write("")
+
+        # 3. 自定义输入与金额计算
+        col_amount, col_total = st.columns([1, 1], gap="small")
+        with col_amount: 
+            cnt = st.number_input(get_txt('coffee_amount'), 1, 100, step=1, key='coffee_num')
+        
+        # 汇率计算逻辑
+        cny_total = cnt * 10
+        usd_total = cnt * 2
+        
+        with col_total: 
+            # 动态显示人民币总额
+            st.markdown(f"""<div style="background:#fff1f2; border-radius:8px; padding:8px; text-align:center; color:#e11d48; font-weight:bold; font-size:1.5rem; height: 100%; display: flex; align-items: center; justify-content: center;">¥{cny_total}</div>""", unsafe_allow_html=True)
+        
+        # 4. 统一支付卡片渲染函数 (核心复用逻辑)
+        def render_pay_tab(title, amount_str, color_class, img_path, qr_data_suffix, link_url=None):
+            # 卡片头部
+            st.markdown(f"""
+                <div class="pay-card">
+                    <div class="pay-label {color_class}">{title}</div>
+                    <div class="pay-amount-display {color_class}">{amount_str}</div>
+                </div>
+            """, unsafe_allow_html=True)
             
-    with t1: show_qr("wechat_pay.jpg")
-    with t2: show_qr("ali_pay.jpg")
+            # 卡片中部：二维码或图片
+            # 使用 container + columns 居中图片
+            c_img_1, c_img_2, c_img_3 = st.columns([1, 3, 1])
+            with c_img_2:
+                if os.path.exists(img_path): 
+                    st.image(img_path, use_container_width=True)
+                else: 
+                    # 本地图片不存在时，生成 API 二维码作为演示
+                    qr_data = f"Donate_{cny_total}_{qr_data_suffix}"
+                    # PayPal 如果是链接模式，二维码也可以指向链接
+                    if link_url: qr_data = link_url
+                    st.image(f"https://api.qrserver.com/v1/create-qr-code/?size=180x180&data={qr_data}", use_container_width=True)
+            
+            # 卡片底部：按钮或提示文字
+            if link_url:
+                # PayPal 等外链跳转
+                st.link_button(f"👉 Pay {amount_str}", link_url, type="primary", use_container_width=True)
+            else:
+                # 扫码提示
+                st.markdown('<div class="pay-instruction">请使用手机扫描上方二维码</div>', unsafe_allow_html=True)
 
-    # 4. 支付反馈
-    st.write("")
-    if st.button(current_text['paid_btn'], type="primary", use_container_width=True):
-        st.balloons()
-        st.success(current_text['paid_toast'].format(count=cnt))
-        time.sleep(2)
-        st.rerun()
+        # 5. 支付方式 Tabs
+        st.write("")
+        t1, t2, t3 = st.tabs([get_txt('pay_wechat'), get_txt('pay_alipay'), get_txt('pay_paypal')])
+        
+        with t1:
+            render_pay_tab("WeChat Pay", f"¥{cny_total}", "color-wechat", "wechat_pay.jpg", "WeChat")
+            
+        with t2:
+            render_pay_tab("Alipay", f"¥{cny_total}", "color-alipay", "ali_pay.jpg", "Alipay")
+            
+        with t3:
+            # PayPal 特殊处理：提供 URL 跳转
+            render_pay_tab("PayPal", f"${usd_total}", "color-paypal", "paypal.png", "PayPal", "https://paypal.me/yourid")
+        
+        # 6. 确认按钮
+        st.write("")
+        if st.button("🎉 " + get_txt('pay_success').split('!')[0], type="primary", use_container_width=True):
+            st.balloons()
+            st.success(get_txt('pay_success').format(count=cnt))
+            time.sleep(1.5)
+            st.rerun()
+
+    # 主界面触发按钮
+    if st.button(get_txt('coffee_btn'), use_container_width=True):
+        show_coffee_window()
 
 # ==========================================
 # 9. 页面主内容与入口

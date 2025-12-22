@@ -322,17 +322,14 @@ with c2:
         # 汇率计算逻辑
         cny_total = cnt * 10
         usd_total = cnt * 2
-        
-        with col_total: 
-            # 动态显示人民币总额
-            st.markdown(f"""<div style="background:#fff1f2; border-radius:8px; padding:8px; text-align:center; color:#e11d48; font-weight:bold; font-size:1.5rem; height: 100%; display: flex; align-items: center; justify-content: center;">¥{cny_total}</div>""", unsafe_allow_html=True)
-        
+
         # 4. 统一支付卡片渲染函数 (核心复用逻辑)
         def render_pay_tab(title, amount_str, color_class, img_path, qr_data_suffix, link_url=None):
             # 卡片头部
             st.markdown(f"""
                 <div class="pay-card">
                     <div class="pay-label {color_class}">{title}</div>
+                    <div class="pay-amount-display {color_class}">{amount_str}</div>
                 </div>
             """, unsafe_allow_html=True)
             

@@ -279,6 +279,11 @@ st.markdown(f"""
     <div class="metric-box" style="border-left:1px solid #ddd; padding-left:20px;"><div class="metric-sub">历史 UV: {total_uv}</div></div>
 </div>""", unsafe_allow_html=True)
 
+# 示例内容区
+st.divider()
+st.title("🎈 My new app Content")
+st.write("这里是付费/解锁后可见的核心内容区域...")
+
 # ==========================================
 # 8. 新版咖啡打赏逻辑 (替换旧版)
 # ==========================================
@@ -328,7 +333,6 @@ with c2:
             st.markdown(f"""
                 <div class="pay-card">
                     <div class="pay-label {color_class}">{title}</div>
-                    <div class="pay-amount-display {color_class}">{amount_str}</div>
                 </div>
             """, unsafe_allow_html=True)
             
@@ -379,18 +383,3 @@ with c2:
     if st.button(get_txt('coffee_btn'), use_container_width=True):
         show_coffee_window()
 
-# ==========================================
-# 9. 页面主内容与入口
-# ==========================================
-#st.markdown(f"<h1 style='text-align:center;'>{current_text['coffee_title']}</h1>", unsafe_allow_html=True)
-
-# 触发按钮
-col_center = st.columns([1, 2, 1])
-with col_center[1]:
-    if st.button(current_text['footer_btn3'], use_container_width=True, key="donate_btn"):
-        show_coffee_window()
-
-# 示例内容区
-st.divider()
-st.title("🎈 My new app Content")
-st.write("这里是付费/解锁后可见的核心内容区域...")

@@ -147,11 +147,6 @@ ACCESS_DURATION_HOURS = 24
 UNLOCK_CODE = "vip24"
 DB_FILE = os.path.join(os.path.expanduser("~/"), "visit_stats.db")
 
-
-
-def get_txt(key): 
-    return LANG_TEXT[st.session_state.lang][key]
-    
 lang_texts = {
     'zh': {
         'coffee_desc': '如果这些工具帮到了你，欢迎支持老登的创作。',
@@ -285,6 +280,10 @@ st.markdown(f"""
 # ==========================================
 # 8. 新版咖啡打赏逻辑 (替换旧版)
 # ==========================================
+
+def get_txt(key): 
+    return LANG_TEXT[st.session_state.lang][key]
+
 st.title("Component Demo")
 st.write("点击下方按钮体验打赏弹窗：")
 

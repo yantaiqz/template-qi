@@ -153,8 +153,9 @@ lang_texts = {
         'footer_btn3': '请老登一杯咖啡 ☕',
         'custom_count': '自定义数量 (杯)',
         'total_label': '总计投入',
-        'pay_wechat': '💬 微信支付',
-        'pay_alipay': '💙 支付宝',
+        'pay_wechat': '微信支付',
+        'pay_alipay': '支付宝',
+        'pay_paypal': '贝宝',
         'paid_btn': '🎉 我已支付，给老登打气！',
         'paid_toast': '收到！感谢你的 {count} 杯咖啡！代码写得更有劲了！❤️',
         'presets': [("☕ 提神", "由衷感谢"), ("🍗 鸡腿", "动力加倍"), ("🚀 续命", "老登不朽")],
@@ -167,8 +168,9 @@ lang_texts = {
         'footer_btn3': 'Support Me ☕',
         'custom_count': 'Custom count (cups)',
         'total_label': 'Total',
-        'pay_wechat': '💬 WeChat',
-        'pay_alipay': '💙 Alipay',
+        'pay_wechat': 'WeChat',
+        'pay_alipay': 'Alipay',
+        'pay_paypal': 'PayPal',
         'paid_btn': '🎉 I have paid!',
         'paid_toast': 'Received! Thanks for the {count} coffees! ❤️',
         'presets': [("☕ Coffee", "Thanks"), ("🍗 Meal", "Power Up"), ("🚀 Rocket", "Amazing")],
@@ -353,7 +355,7 @@ with c2:
 
         # 5. 支付方式 Tabs
         st.write("")
-        t1, t2, t3 = st.tabs([get_txt('pay_wechat'), get_txt('pay_alipay'), get_txt('paypal')])
+        t1, t2, t3 = st.tabs([get_txt('pay_wechat'), get_txt('pay_alipay'), get_txt('pay_paypal')])
         
         with t1:
             render_pay_tab("WeChat Pay", f"¥{cny_total}", "color-wechat", "wechat_pay.jpg", "WeChat")

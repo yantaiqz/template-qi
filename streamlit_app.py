@@ -243,87 +243,6 @@ st.divider()
 st.title("🎈 My new app Content")
 st.write("这里是付费/解锁后可见的核心内容区域...")
 
-# ==========================================
-# 7. 数据库逻辑 (保持原样)
-# ==========================================
-
-import sqlite3
-import datetime
-import os
-
-# 数据库文件路径配置（这里建议使用绝对路径以保证稳定性）
-DB_DIR = os.path.expanduser("~/")
-DB_FILE = os.path.join(DB_DIR, "template_visit_stats.db")
-    
-def track_stats():
-    try:
-        # 建立连接
-        conn = sqlite3.connect(DB_FILE, check_same_thread=False)
-        c = conn.cursor()
-        
-        # 1. 创建表结构
-        # daily_traffic: 记录每天的 PV
-        c.execute('''CREATE TABLE IF NOT EXISTS daily_traffic 
-                     (date TEXT PRIMARY KEY, pv_count INTEGER DEFAULT 0)''')
-        # visitors: 记录每个唯一 ID 及其最后访问日期，用于计算 UV
-        c.execute('''CREATE TABLE IF NOT EXISTS visitors 
-                     (visitor_id TEXT PRIMARY KEY, last_visit_date TEXT)''')
-        
-        today = datetime.datetime.utcnow().date().isoformat()
-        vid = st.session_state["visitor_id"]
-        
-        # 2. 写入统计数据 (当前 Session 仅执行一次，防止刷新增加)
-        if "has_counted" not in st.session_state:
-            # 更新 PV (今日浏览量)
-            c.execute("INSERT OR IGNORE INTO daily_traffic (date, pv_count) VALUES (?, 0)", (today,))
-            c.execute("UPDATE daily_traffic SET pv_count = pv_count + 1 WHERE date=?", (today,))
-            
-            # 更新 UV (唯一访客) - INSERT OR REPLACE 确保同一访客日期更新
-            c.execute("INSERT OR REPLACE INTO visitors (visitor_id, last_visit_date) VALUES (?, ?)", (vid, today))
-            
-            conn.commit()
-            st.session_state["has_counted"] = True
-        
-        # 3. 读取统计结果
-        # 今日 UV: 统计 visitors 表中最后日期为今天的总数
-        t_uv = c.execute("SELECT COUNT(*) FROM visitors WHERE last_visit_date=?", (today,)).fetchone()[0]
-        # 历史 UV: 统计 visitors 表中总行数
-        a_uv = c.execute("SELECT COUNT(*) FROM visitors").fetchone()[0]
-        # 今日 PV: 从 daily_traffic 表读取
-        t_pv = c.execute("SELECT pv_count FROM daily_traffic WHERE date=?", (today,)).fetchone()[0]
-        
-        conn.close()
-        return t_uv, a_uv, t_pv
-    except Exception as e:
-        # 打印错误方便调试
-        print(f"Database error: {e}")
-        return 0, 0, 0
-
-# 获取数据
-today_uv, total_uv, today_pv = track_stats()
-
-# 渲染 UI (带样式)
-st.markdown(f"""
-<style>
-    .stats-bar {{
-        display: flex; justify-content: center; gap: 25px; margin-top: 40px; 
-        padding: 15px 25px; background-color: white; border-radius: 50px; 
-        border: 1px solid #eee; color: #6b7280; font-size: 0.85rem; 
-        width: fit-content; margin-left: auto; margin-right: auto; 
-        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-    }}
-</style>
-<div class="stats-bar">
-    <div style="text-align: center;">
-        <div>今日 UV</div>
-        <div style="font-weight:700; color:#111;">{today_uv}</div>
-    </div>
-    <div style="border-left:1px solid #eee; padding-left:25px; text-align: center;">
-        <div>历史 UV</div>
-        <div style="font-weight:700; color:#111;">{total_uv}</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
 # ==========================================
 # 8. 新版咖啡打赏逻辑 (替换旧版)
@@ -332,6 +251,7 @@ st.markdown(f"""
 def get_txt(key): 
     return lang_texts[st.session_state.language][key]
 
+st.markdown("<br><br>", unsafe_allow_html=True)    
 c1, c2, c3 = st.columns([1, 2, 1])
 
 with c2:
@@ -426,3 +346,85 @@ with c2:
     if st.button(get_txt('coffee_btn'), use_container_width=True):
         show_coffee_window()
 
+
+# ==========================================
+# 7. 数据库逻辑 (保持原样)
+# ==========================================
+
+import sqlite3
+import datetime
+import os
+
+# 数据库文件路径配置（这里建议使用绝对路径以保证稳定性）
+DB_DIR = os.path.expanduser("~/")
+DB_FILE = os.path.join(DB_DIR, "template_visit_stats.db")
+    
+def track_stats():
+    try:
+        # 建立连接
+        conn = sqlite3.connect(DB_FILE, check_same_thread=False)
+        c = conn.cursor()
+        
+        # 1. 创建表结构
+        # daily_traffic: 记录每天的 PV
+        c.execute('''CREATE TABLE IF NOT EXISTS daily_traffic 
+                     (date TEXT PRIMARY KEY, pv_count INTEGER DEFAULT 0)''')
+        # visitors: 记录每个唯一 ID 及其最后访问日期，用于计算 UV
+        c.execute('''CREATE TABLE IF NOT EXISTS visitors 
+                     (visitor_id TEXT PRIMARY KEY, last_visit_date TEXT)''')
+        
+        today = datetime.datetime.utcnow().date().isoformat()
+        vid = st.session_state["visitor_id"]
+        
+        # 2. 写入统计数据 (当前 Session 仅执行一次，防止刷新增加)
+        if "has_counted" not in st.session_state:
+            # 更新 PV (今日浏览量)
+            c.execute("INSERT OR IGNORE INTO daily_traffic (date, pv_count) VALUES (?, 0)", (today,))
+            c.execute("UPDATE daily_traffic SET pv_count = pv_count + 1 WHERE date=?", (today,))
+            
+            # 更新 UV (唯一访客) - INSERT OR REPLACE 确保同一访客日期更新
+            c.execute("INSERT OR REPLACE INTO visitors (visitor_id, last_visit_date) VALUES (?, ?)", (vid, today))
+            
+            conn.commit()
+            st.session_state["has_counted"] = True
+        
+        # 3. 读取统计结果
+        # 今日 UV: 统计 visitors 表中最后日期为今天的总数
+        t_uv = c.execute("SELECT COUNT(*) FROM visitors WHERE last_visit_date=?", (today,)).fetchone()[0]
+        # 历史 UV: 统计 visitors 表中总行数
+        a_uv = c.execute("SELECT COUNT(*) FROM visitors").fetchone()[0]
+        # 今日 PV: 从 daily_traffic 表读取
+        t_pv = c.execute("SELECT pv_count FROM daily_traffic WHERE date=?", (today,)).fetchone()[0]
+        
+        conn.close()
+        return t_uv, a_uv, t_pv
+    except Exception as e:
+        # 打印错误方便调试
+        print(f"Database error: {e}")
+        return 0, 0, 0
+
+# 获取数据
+today_uv, total_uv, today_pv = track_stats()
+
+# 渲染 UI (带样式)
+st.markdown(f"""
+<style>
+    .stats-bar {{
+        display: flex; justify-content: center; gap: 25px; margin-top: 40px; 
+        padding: 15px 25px; background-color: white; border-radius: 50px; 
+        border: 1px solid #eee; color: #6b7280; font-size: 0.85rem; 
+        width: fit-content; margin-left: auto; margin-right: auto; 
+        box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+    }}
+</style>
+<div class="stats-bar">
+    <div style="text-align: center;">
+        <div>今日 UV</div>
+        <div style="font-weight:700; color:#111;">{today_uv}</div>
+    </div>
+    <div style="border-left:1px solid #eee; padding-left:25px; text-align: center;">
+        <div>历史 UV</div>
+        <div style="font-weight:700; color:#111;">{total_uv}</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)

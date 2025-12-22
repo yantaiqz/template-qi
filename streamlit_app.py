@@ -282,7 +282,7 @@ st.markdown(f"""
 # ==========================================
 
 def get_txt(key): 
-    return LANG_TEXT[st.session_state.language][key]
+    return lang_texts[st.session_state.language][key]
 
 st.title("Component Demo")
 st.write("点击下方按钮体验打赏弹窗：")

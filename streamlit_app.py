@@ -194,7 +194,7 @@ with col_lang:
 
 with col_more:
     st.markdown("""
-        <a href="#" target="_blank" class="neal-btn-link">
+        <a href="https://laodeng.streamlit.app/" target="_blank" class="neal-btn-link">
             <button class="neal-btn">✨ 更多好玩应用</button>
         </a>""", unsafe_allow_html=True)
 
